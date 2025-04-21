@@ -74,14 +74,57 @@ class GifExporter {
         // Reset engine to start of animation
         this.engine.resetAnimation();
         
+        // Store original background color
+        const backgroundColor = this.config.getBackgroundColor();
+        
+        // Create a temporary canvas for rendering each frame
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        const tempCtx = tempCanvas.getContext('2d');
+        
         // Add frames at regular intervals
         for (let progress = 0; progress <= 1; progress += frameStep) {
-            // Render the frame at this progress point
-            this.engine.renderFrameAt(ctx, progress);
+            // Clear the temporary canvas
+            tempCtx.fillStyle = backgroundColor;
+            tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // Render the frame at this progress point without cursor
+            this.renderFrameWithoutCursor(tempCtx, progress);
             
             // Add the frame to the GIF
-            gif.addFrame(canvas, { delay: frameDelay, copy: true });
+            gif.addFrame(tempCanvas, { delay: frameDelay, copy: true });
         }
+    }
+    
+    /**
+     * Render a frame at specific progress without cursor
+     * @param {CanvasRenderingContext2D} ctx - Canvas context
+     * @param {number} progress - Animation progress (0-1)
+     */
+    renderFrameWithoutCursor(ctx, progress) {
+        // Get current configuration
+        const text = this.config.getText();
+        const font = this.config.getFont();
+        const fontSize = this.config.getFontSize();
+        const color = this.config.getColor();
+        const canvas = ctx.canvas;
+        
+        // Configure renderer options
+        const options = {
+            font: font,
+            fontSize: fontSize,
+            color: color,
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            align: 'center',
+            baseline: 'middle',
+            noCursor: true // Signal to not render cursor
+        };
+        
+        // Get renderer from engine and directly render with our custom options
+        // This bypasses the engine's own rendering method
+        this.engine.renderer.renderAnimatedText(text, progress, options);
     }
     
     /**

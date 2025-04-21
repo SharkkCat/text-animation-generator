@@ -23,7 +23,8 @@ class TextRenderer {
             x: 0,
             y: 0,
             align: 'left',
-            baseline: 'top'
+            baseline: 'top',
+            noCursor: false
         };
         
         // Merge default options with provided options
@@ -122,7 +123,7 @@ class TextRenderer {
         }
         
         // Optional: render a cursor at the end of the visible content
-        if (progress < 1 && progress > 0) {
+        if (progress < 1 && progress > 0 && !opts.noCursor) {
             this.renderCursor(currentX, opts.y, opts);
         }
     }
