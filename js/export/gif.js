@@ -68,17 +68,28 @@ class GifExporter {
         const frameDelay = this.getFrameDelay(animationSpeed);
         
         // Calculate the number of frames based on speed
-        // Faster animations need more frames to appear smooth
+        // We need fewer total frames for faster speeds to match the preview perception
         let totalFrames;
+        
+        // Base frames for quality levels
+        const baseFramesHigh = 24;
+        const baseFramesMed = 16;
+        const baseFramesLow = 12;
+        
+        // Adjustment based on speed - we want fewer frames for higher speeds
+        // to better match how the preview handles speed (fewer frames, each with more progress)
+        // Speed is 1-10, with 5 being medium
+        const speedFactor = Math.sqrt(animationSpeed / 5); // Non-linear scaling
+        
         if (options.quality === 'high') {
-            // For high quality, use more frames and ensure smoother animations
-            totalFrames = Math.max(30, Math.min(150, 30 * (animationSpeed / 5)));
+            // High quality with speed adjustment
+            totalFrames = Math.max(20, Math.round(baseFramesHigh * speedFactor));
         } else if (options.quality === 'medium') {
-            // Medium quality balance between smoothness and file size
-            totalFrames = Math.max(20, Math.min(100, 20 * (animationSpeed / 5)));
+            // Medium quality with speed adjustment
+            totalFrames = Math.max(15, Math.round(baseFramesMed * speedFactor));
         } else {
-            // Low quality, fewer frames but still maintain basic smoothness
-            totalFrames = Math.max(15, Math.min(50, 15 * (animationSpeed / 5)));
+            // Low quality with speed adjustment
+            totalFrames = Math.max(10, Math.round(baseFramesLow * speedFactor));
         }
         
         // Get original canvas and context
@@ -146,17 +157,22 @@ class GifExporter {
         // We need to match the same speed factor used in the animation engine
         // In AnimationEngine: speedFactor = speed / 5
         
-        // Apply a compensation factor to better match the perceived speed in the preview
+        // Apply a much more aggressive compensation factor to better match the perceived speed in the preview
         // Preview runs in real-time with adaptive frame rates, but GIFs have fixed delays
-        const speedCompensation = 0.6; // Reduce delay by 40% to match perceived preview speed
+        const speedCompensation = 0.3; // 70% faster than previous attempt (was 0.6)
         
-        // Base delay at medium speed (5) - reduced overall to make animations faster
-        const baseDelay = 50 * speedCompensation; // ~30ms at speed 5
+        // Base delay at medium speed (5) - drastically reduced
+        const baseDelay = 50 * speedCompensation; // ~15ms at speed 5
         
         // Adjust delay inversely proportional to speed
-        // Speed 1 (slowest): ~150ms 
-        // Speed 5 (medium): ~30ms
-        // Speed 10 (fastest): ~15ms
-        return Math.round(baseDelay * (5 / speed));
+        // Speed 1 (slowest): ~75ms 
+        // Speed 5 (medium): ~15ms
+        // Speed 10 (fastest): ~8ms
+        
+        // Calculate the final delay
+        const delay = Math.round(baseDelay * (5 / speed));
+        
+        // Ensure we don't go below browser minimum for GIF (usually ~10ms)
+        return Math.max(10, delay);
     }
 } 
