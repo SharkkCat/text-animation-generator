@@ -101,7 +101,17 @@ class TextRenderer {
                 if (currentLength < visibleLength) {
                     const icon = iconManager.getIcon(segment.icon);
                     if (icon) {
-                        icon.render(this.ctx, currentX, opts.y + opts.fontSize/2, opts.fontSize, opts.color);
+                        // Calculate Y position based on baseline
+                        let iconY;
+                        if (opts.baseline === 'top') {
+                            iconY = opts.y + opts.fontSize/2;
+                        } else if (opts.baseline === 'middle') {
+                            iconY = opts.y;
+                        } else {
+                            // For 'bottom', 'alphabetic', etc.
+                            iconY = opts.y - opts.fontSize/3;
+                        }
+                        icon.render(this.ctx, currentX, iconY, opts.fontSize, opts.color);
                         currentX += opts.fontSize;
                         currentLength += 1; // Count icon as one character
                     }
@@ -142,7 +152,10 @@ class TextRenderer {
                 } else if (segment.type === 'icon') {
                     const icon = iconManager.getIcon(segment.icon);
                     if (icon) {
-                        icon.render(this.ctx, currentX, y + options.fontSize/2, options.fontSize, options.color);
+                        // Calculate Y position based on text position
+                        // For multiline text, we need to adjust based on typical baseline
+                        const iconY = y + (options.fontSize/3);
+                        icon.render(this.ctx, currentX, iconY, options.fontSize, options.color);
                         currentX += options.fontSize;
                     }
                 }

@@ -44,6 +44,7 @@ class IconManager {
                     ctx.font = `${size}px 'Material Icons'`;
                     ctx.fillStyle = color;
                     ctx.textBaseline = 'middle';
+                    ctx.textAlign = 'left';
                     ctx.fillText(name, x, y);
                     ctx.restore();
                 }
