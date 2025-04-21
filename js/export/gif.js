@@ -71,11 +71,14 @@ class GifExporter {
         // Faster animations need more frames to appear smooth
         let totalFrames;
         if (options.quality === 'high') {
-            totalFrames = Math.max(20, Math.min(100, 20 * (animationSpeed / 5)));
+            // For high quality, use more frames and ensure smoother animations
+            totalFrames = Math.max(30, Math.min(150, 30 * (animationSpeed / 5)));
         } else if (options.quality === 'medium') {
-            totalFrames = Math.max(15, Math.min(60, 15 * (animationSpeed / 5)));
+            // Medium quality balance between smoothness and file size
+            totalFrames = Math.max(20, Math.min(100, 20 * (animationSpeed / 5)));
         } else {
-            totalFrames = Math.max(10, Math.min(30, 10 * (animationSpeed / 5)));
+            // Low quality, fewer frames but still maintain basic smoothness
+            totalFrames = Math.max(15, Math.min(50, 15 * (animationSpeed / 5)));
         }
         
         // Get original canvas and context
@@ -143,13 +146,17 @@ class GifExporter {
         // We need to match the same speed factor used in the animation engine
         // In AnimationEngine: speedFactor = speed / 5
         
-        // Base delay at medium speed (5)
-        const baseDelay = 100; // 100ms at speed 5
+        // Apply a compensation factor to better match the perceived speed in the preview
+        // Preview runs in real-time with adaptive frame rates, but GIFs have fixed delays
+        const speedCompensation = 0.6; // Reduce delay by 40% to match perceived preview speed
+        
+        // Base delay at medium speed (5) - reduced overall to make animations faster
+        const baseDelay = 50 * speedCompensation; // ~30ms at speed 5
         
         // Adjust delay inversely proportional to speed
-        // Speed 1 (slowest): 500ms
-        // Speed 5 (medium): 100ms
-        // Speed 10 (fastest): 50ms
+        // Speed 1 (slowest): ~150ms 
+        // Speed 5 (medium): ~30ms
+        // Speed 10 (fastest): ~15ms
         return Math.round(baseDelay * (5 / speed));
     }
 } 
