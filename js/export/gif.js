@@ -67,6 +67,17 @@ class GifExporter {
         const frameStep = this.getFrameStep(options.quality);
         const frameDelay = this.getFrameDelay(animationSpeed);
         
+        // Calculate the number of frames based on speed
+        // Faster animations need more frames to appear smooth
+        let totalFrames;
+        if (options.quality === 'high') {
+            totalFrames = Math.max(20, Math.min(100, 20 * (animationSpeed / 5)));
+        } else if (options.quality === 'medium') {
+            totalFrames = Math.max(15, Math.min(60, 15 * (animationSpeed / 5)));
+        } else {
+            totalFrames = Math.max(10, Math.min(30, 10 * (animationSpeed / 5)));
+        }
+        
         // Get original canvas and context
         const originalCanvas = document.getElementById('animation-canvas');
         const originalCtx = originalCanvas.getContext('2d');
@@ -78,7 +89,10 @@ class GifExporter {
         const backgroundColor = this.config.getBackgroundColor();
         
         // Add frames at regular intervals
-        for (let progress = 0; progress <= 1; progress += frameStep) {
+        for (let i = 0; i <= totalFrames; i++) {
+            // Calculate progress for this frame
+            const progress = i / totalFrames;
+            
             // Clear the original canvas
             originalCtx.fillStyle = backgroundColor;
             originalCtx.fillRect(0, 0, originalCanvas.width, originalCanvas.height);
@@ -125,8 +139,17 @@ class GifExporter {
      * @returns {number} Frame delay in milliseconds
      */
     getFrameDelay(speed) {
-        // Convert speed (1-10) to frame delay (50-200ms)
-        // Slower speed = higher delay
-        return Math.round(250 - (speed * 20));
+        // Convert speed (1-10) to frame delay
+        // We need to match the same speed factor used in the animation engine
+        // In AnimationEngine: speedFactor = speed / 5
+        
+        // Base delay at medium speed (5)
+        const baseDelay = 100; // 100ms at speed 5
+        
+        // Adjust delay inversely proportional to speed
+        // Speed 1 (slowest): 500ms
+        // Speed 5 (medium): 100ms
+        // Speed 10 (fastest): 50ms
+        return Math.round(baseDelay * (5 / speed));
     }
 } 
