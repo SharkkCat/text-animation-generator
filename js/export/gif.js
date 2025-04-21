@@ -67,10 +67,6 @@ class GifExporter {
         const frameStep = this.getFrameStep(options.quality);
         const frameDelay = this.getFrameDelay(animationSpeed);
         
-        // Get canvas and context
-        const canvas = document.getElementById('animation-canvas');
-        const ctx = canvas.getContext('2d');
-        
         // Reset engine to start of animation
         this.engine.resetAnimation();
         
@@ -79,8 +75,8 @@ class GifExporter {
         
         // Create a temporary canvas for rendering each frame
         const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = canvas.width;
-        tempCanvas.height = canvas.height;
+        tempCanvas.width = this.config.getCanvasWidth();
+        tempCanvas.height = this.config.getCanvasHeight();
         const tempCtx = tempCanvas.getContext('2d');
         
         // Add frames at regular intervals
@@ -89,42 +85,31 @@ class GifExporter {
             tempCtx.fillStyle = backgroundColor;
             tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
             
-            // Render the frame at this progress point without cursor
-            this.renderFrameWithoutCursor(tempCtx, progress);
+            // Get current configuration
+            const font = this.config.getFont();
+            const fontSize = this.config.getFontSize();
+            const color = this.config.getColor();
+            
+            // Configure renderer options
+            const options = {
+                font: font,
+                fontSize: fontSize,
+                color: color,
+                x: tempCanvas.width / 2,
+                y: tempCanvas.height / 2,
+                align: 'center',
+                baseline: 'middle'
+            };
+            
+            // Render the frame directly with the renderer
+            const renderer = this.engine.renderer;
+            renderer.ctx = tempCtx; // Temporarily set context to our temp canvas
+            renderer.renderAnimatedText(text, progress, options);
+            renderer.ctx = this.engine.ctx; // Restore original context
             
             // Add the frame to the GIF
             gif.addFrame(tempCanvas, { delay: frameDelay, copy: true });
         }
-    }
-    
-    /**
-     * Render a frame at specific progress without cursor
-     * @param {CanvasRenderingContext2D} ctx - Canvas context
-     * @param {number} progress - Animation progress (0-1)
-     */
-    renderFrameWithoutCursor(ctx, progress) {
-        // Get current configuration
-        const text = this.config.getText();
-        const font = this.config.getFont();
-        const fontSize = this.config.getFontSize();
-        const color = this.config.getColor();
-        const canvas = ctx.canvas;
-        
-        // Configure renderer options
-        const options = {
-            font: font,
-            fontSize: fontSize,
-            color: color,
-            x: canvas.width / 2,
-            y: canvas.height / 2,
-            align: 'center',
-            baseline: 'middle',
-            noCursor: true // Signal to not render cursor
-        };
-        
-        // Get renderer from engine and directly render with our custom options
-        // This bypasses the engine's own rendering method
-        this.engine.renderer.renderAnimatedText(text, progress, options);
     }
     
     /**

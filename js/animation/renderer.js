@@ -121,11 +121,6 @@ class TextRenderer {
                 }
             }
         }
-        
-        // Optional: render a cursor at the end of the visible content
-        if (progress < 1 && progress > 0 && !opts.noCursor) {
-            this.renderCursor(currentX, opts.y, opts);
-        }
     }
     
     /**
@@ -165,16 +160,13 @@ class TextRenderer {
     }
     
     /**
-     * Render a cursor at the specified position
+     * Render a cursor at the specified position - this method is disabled
      * @param {number} x - X position
      * @param {number} y - Y position
      * @param {object} options - Rendering options
      */
     renderCursor(x, y, options) {
-        // Draw cursor (simple vertical line)
-        this.ctx.save();
-        this.ctx.fillStyle = options.color;
-        this.ctx.fillRect(x, y - options.fontSize/2, 2, options.fontSize);
-        this.ctx.restore();
+        // Cursor rendering disabled
+        // No more vertical lines
     }
 } 
