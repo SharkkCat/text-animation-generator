@@ -27,7 +27,8 @@ class GifExporter {
                     quality: this.getQualityValue(options.quality),
                     width: width,
                     height: height,
-                    workerScript: 'libs/gif.js/gif.worker.js'
+                    workerScript: 'libs/gif.js/gif.worker.js',
+                    background: this.config.getBackgroundColor()
                 });
                 
                 // Set up progress handler
@@ -66,17 +67,20 @@ class GifExporter {
         const frameStep = this.getFrameStep(options.quality);
         const frameDelay = this.getFrameDelay(animationSpeed);
         
+        // Get canvas and context
+        const canvas = document.getElementById('animation-canvas');
+        const ctx = canvas.getContext('2d');
+        
         // Reset engine to start of animation
-        this.engine.stopAnimation();
+        this.engine.resetAnimation();
         
         // Add frames at regular intervals
         for (let progress = 0; progress <= 1; progress += frameStep) {
             // Render the frame at this progress point
-            this.engine.renderFrameAt(progress);
+            this.engine.renderFrameAt(ctx, progress);
             
             // Add the frame to the GIF
-            const frame = this.engine.getCanvas();
-            gif.addFrame(frame, { delay: frameDelay, copy: true });
+            gif.addFrame(canvas, { delay: frameDelay, copy: true });
         }
     }
     

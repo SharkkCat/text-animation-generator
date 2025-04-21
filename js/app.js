@@ -39,9 +39,10 @@ class App {
         this.controlsManager = new ControlsManager(this.config);
         
         // Export modules
-        this.gifExporter = new GIFExporter(this.animationEngine);
-        this.videoExporter = new VideoExporter(this.animationEngine);
-        this.exportManager = new ExportManager(this.gifExporter, this.videoExporter);
+        this.gifExporter = new GifExporter(this.animationEngine, this.config);
+        this.videoExporter = new VideoExporter(this.animationEngine, this.config);
+        this.exportManager = new ExportManager(this.config, this.previewManager);
+        this.exportManager.initialize(this.animationEngine);
     }
     
     setupEventListeners() {
