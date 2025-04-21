@@ -68,8 +68,17 @@ class AnimationEngine {
             baseline: 'middle'
         };
         
+        // Save the original context
+        const originalCtx = this.renderer.ctx;
+        
+        // Temporarily set the renderer's context to the provided context
+        this.renderer.ctx = ctx;
+        
         // Render the text with current progress
         this.renderer.renderAnimatedText(text, this.progress, options);
+        
+        // Restore the original context
+        this.renderer.ctx = originalCtx;
     }
     
     /**

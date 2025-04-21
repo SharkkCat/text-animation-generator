@@ -67,48 +67,27 @@ class GifExporter {
         const frameStep = this.getFrameStep(options.quality);
         const frameDelay = this.getFrameDelay(animationSpeed);
         
+        // Get original canvas and context
+        const originalCanvas = document.getElementById('animation-canvas');
+        const originalCtx = originalCanvas.getContext('2d');
+        
         // Reset engine to start of animation
         this.engine.resetAnimation();
         
         // Store original background color
         const backgroundColor = this.config.getBackgroundColor();
         
-        // Create a temporary canvas for rendering each frame
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = this.config.getCanvasWidth();
-        tempCanvas.height = this.config.getCanvasHeight();
-        const tempCtx = tempCanvas.getContext('2d');
-        
         // Add frames at regular intervals
         for (let progress = 0; progress <= 1; progress += frameStep) {
-            // Clear the temporary canvas
-            tempCtx.fillStyle = backgroundColor;
-            tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            // Clear the original canvas
+            originalCtx.fillStyle = backgroundColor;
+            originalCtx.fillRect(0, 0, originalCanvas.width, originalCanvas.height);
             
-            // Get current configuration
-            const font = this.config.getFont();
-            const fontSize = this.config.getFontSize();
-            const color = this.config.getColor();
-            
-            // Configure renderer options
-            const options = {
-                font: font,
-                fontSize: fontSize,
-                color: color,
-                x: tempCanvas.width / 2,
-                y: tempCanvas.height / 2,
-                align: 'center',
-                baseline: 'middle'
-            };
-            
-            // Render the frame directly with the renderer
-            const renderer = this.engine.renderer;
-            renderer.ctx = tempCtx; // Temporarily set context to our temp canvas
-            renderer.renderAnimatedText(text, progress, options);
-            renderer.ctx = this.engine.ctx; // Restore original context
+            // Render the frame at the current progress
+            this.engine.renderFrameAt(originalCtx, progress);
             
             // Add the frame to the GIF
-            gif.addFrame(tempCanvas, { delay: frameDelay, copy: true });
+            gif.addFrame(originalCanvas, { delay: frameDelay, copy: true });
         }
     }
     
